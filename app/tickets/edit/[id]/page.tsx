@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import React from "react";
+import prisma from "@/prisma/db";
 
 interface Props {
   params: { id: string };

@@ -15,13 +15,17 @@ import { buttonVariants } from "@/components/ui/button";
 import ReactMarkDown from "react-markdown";
 import DeleteButton from "./DeleteButton";
 import AssignTicket from "@/components/AssignTicket";
+import { getServerSession } from "next-auth";
+import options from "../../api/auth/[...nextauth]/options";
 
 interface Props {
   ticket: Ticket;
   users: User[];
 }
 
-const TicketDetail = ({ ticket, users }: Props) => {
+const TicketDetail = async ({ ticket, users }: Props) => {
+  const session = await getServerSession(options);
+
   return (
     <div className="lg:grid lg:grid-cols-4">
       <Card className="mx-4 mb-4 lg:col-span-3 lg:mr-4">
@@ -60,14 +64,23 @@ const TicketDetail = ({ ticket, users }: Props) => {
       </Card>
       <div className="mx-4 flex lg:flex-col lg:mx-0 gap-2">
         <AssignTicket ticket={ticket} users={users} />
-        <Link
-          href={`/tickets/edit/${ticket.id}`}
-          className={`${buttonVariants({
-            variant: "default",
-          })}`}
-        >
-          Edit Ticket
-        </Link>
+        {session?.user.role === "ADMIN" ? (
+          <Link
+            href={`/tickets/edit/${ticket.id}`}
+            className={`${buttonVariants({
+              variant: "default",
+            })}`}
+          >
+            Edit Ticket
+          </Link>
+        ) : (
+          <button
+            className={buttonVariants({ variant: "default" }) + " cursor-not-allowed opacity-50"}
+            disabled
+          >
+            Edit Ticket
+          </button>
+        )}
         <DeleteButton ticketId={ticket.id} />
       </div>
     </div>

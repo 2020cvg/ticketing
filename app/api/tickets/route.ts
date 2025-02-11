@@ -7,7 +7,7 @@ import options from "../auth/[...nextauth]/options";
 export async function POST(request: NextRequest) {
   const session = await getServerSession(options);
 
-  if (!session) {
+  if (!session || session.user?.role !== "ADMIN") {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 

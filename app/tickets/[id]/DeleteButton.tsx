@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,11 +14,26 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { getSession } from "next-auth/react";
 
 const DeleteButton = ({ ticketId }: { ticketId: number }) => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [session, setSession] = useState<any>(null); // Adjust the type according to your session structure
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const sessionData = await getSession();
+        setSession(sessionData);
+      } catch (error) {
+        console.error("Failed to fetch session:", error);
+      }
+    };
+
+    fetchSession();
+  }, []);
 
   const deleteTicket = async () => {
     try {
@@ -39,7 +54,7 @@ const DeleteButton = ({ ticketId }: { ticketId: number }) => {
           className={buttonVariants({
             variant: "destructive",
           })}
-          disabled={isDeleting}
+          disabled={isDeleting || session?.user.role !== "ADMIN"}
         >
           Delete Ticket
         </AlertDialogTrigger>

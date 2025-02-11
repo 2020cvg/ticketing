@@ -6,6 +6,8 @@ import { buttonVariants } from "@/components/ui/button";
 import Pagination from "@/components/Pagination";
 import StatusFilter from "@/components/StatusFilter";
 import { Status, Ticket } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import options from "../api/auth/[...nextauth]/options";
 
 export interface SearchParams {
   status: Status;
@@ -16,6 +18,7 @@ export interface SearchParams {
 const Tickets = async ({ searchParams }: { searchParams: SearchParams }) => {
   const pageSize = 10;
   const page = parseInt(searchParams.page) || 1;
+  const session = await getServerSession(options);
 
   const orderBy = searchParams.orderBy ? searchParams.orderBy : "createdAt";
 
@@ -48,12 +51,21 @@ const Tickets = async ({ searchParams }: { searchParams: SearchParams }) => {
   return (
     <div>
       <div className="flex gap-2">
-        <Link
-          href="/tickets/new"
-          className={buttonVariants({ variant: "default" })}
-        >
-          New Ticket
-        </Link>
+      {session?.user.role === "ADMIN" ? (
+          <Link
+            href="/tickets/new"
+            className={buttonVariants({ variant: "default" })}
+          >
+            New Ticket
+          </Link>
+        ) : (
+          <button
+            className={buttonVariants({ variant: "default" }) + " cursor-not-allowed opacity-50"}
+            disabled
+          >
+            New Ticket
+          </button>
+        )}
         <StatusFilter />
       </div>
       <DataTable tickets={tickets} searchParams={searchParams} />
